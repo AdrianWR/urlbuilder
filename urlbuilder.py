@@ -11,21 +11,7 @@ Original file is located at
 This notebook give some examples of article data mining found on https://scielo.br/. The main search therms include the words "bio", "medicine" and "virus". The classes which give us the Location and Engine were not tested on other member domains of Scielo, like https://scielo.mec.pt or https://scielo.conicyt.cl/
 """
 
-# Simon's script to get driver running ok
-
-#!apt-get update                                 # Update Ubuntu to correctly run apt-install
-#!apt install chromium-chromedriver=84.0.4147.105-0ubuntu0.18.04.1    # Installs to '/usr/lib/chromium-browser/chromedriver'
-#!pip install centaurminer==0.0.8
-
-"""# Attention!
-*There are still some requirements regarding the package that Simon is working on, but you'd probably succeed in running on your machine with your own pip centaurminer installation. It seems that you'll need google-chrome .deb package installed as well.*
-
-# Google BigQuery Integration Setup
-
-At this moment, it's necessary to set up our authentication credentials to input data into the bigquery. At first, let's declare a schema based on other tables already stored in BREATHE. Then, we set up our `pandas-gbq` instance with credentials and dataset information, to later append dataframes onto the BQ.
-"""
-
-from google.oauth2 import service_account
+from google.oauth2.service_account import Credentials
 import pandas_gbq
 import os
 
@@ -34,10 +20,11 @@ import os
 # working directory. If this file doesn't exist, we authenticate
 # with web login.
 try:
-    credentials = service_account.Credentials.from_service_account_file('credentials.json')
-except FileNotFoundError:
-    credentials = auth.authenticate_user()
-print('Authenticated')
+    cred_file = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+    credentials = Credentials.from_service_account_file(cred_file)
+except (KeyError, FileNotFoundError):
+    print("Invalid credentials. Set GOOGLE_APPLICATION_CREDENTIALS to your credentials file.");
+    exit(1);
 
 # The order is important here.
 # Be careful before changing any value.
