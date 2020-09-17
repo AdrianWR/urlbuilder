@@ -17,7 +17,7 @@ The most common way to run this URL Builder script is to run it on a Docker cont
 At the moment of running the container, it's required to set up some environment variables at the runtime, related to the BigQuery authentication and authorization workflow. The followinf variables must be set:
 - `PROJECT_ID`: Name of the Google Cloud project;
 - `TABLE_ID`: In the format `dataset_id`.`table_id`. Required to declare the dataset to insert the information extracted from the search pages. Example: *urls.articles*;
-- `GOOGLE_APPLICATION_CREDENTIALS`: Credentials file associated with the account with BigQuery permissions. On instructions with how to set up your credentials, follow [Service accounts](https://cloud.google.com/iam/docs/service-accounts). The following roles must be defined to the correct runtime of the URL Builder:
+- `GOOGLE_APPLICATION_CREDENTIALS`: Credentials file associated with the account with BigQuery permissions. On instructions with how to set up your credentials, follow [Service accounts](https://cloud.google.com/iam/docs/service-accounts). The following role permissions must be defined to the correct runtime of the URL Builder:
 
 
     - `bigquery.jobs.create`
@@ -25,11 +25,14 @@ At the moment of running the container, it's required to set up some environment
     - `bigquery.tables.get`
     - `bigquery.tables.updateData`
 
-``
+To run the container on its own, it's possible to use the following command:
+```
     docker run --rm -d
     --env PROJECT_ID="my-project"
     --env TABLE_ID="my-dataset.my-credentials"
     --env GOOGLE_APPLICATION_CREDENTIALS=/credentials.json
     --mount type=bind,source="$(pwd)"/credentials.json,target=/credentials.json,readonly
-    builder medicine virus 100
-``
+    IMAGE_NAME KEYWORDS LIMIT
+```
+
+The `KEYWORDS` argument could be one or more words, defining the search terms to genreate the links on the search mechanism. The `LIMIT` variable is an integer, representing how many links to gather and send to the BigQuery table.
