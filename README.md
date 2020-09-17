@@ -5,7 +5,7 @@ This repository contains a simple setup to create a URL Builder instance to act 
 
 ### Installation
 
-Before proceeding, it's not advised to run this scraper on your local machine, as some websites may block yor IP address upon a number of requests on a particular domain. When data mining, be assured to follow very stricit ethical guidelines before running your process, to not clog up domain servers from scientific websites. Be polite while mining.  
+Before proceeding, it's not advised to run this scraper on your local machine, as some websites may block yor IP address upon a number of requests on a particular domain. When data mining, be assured to follow very stricit ethical guidelines before running your process, to not clog up domain servers from scientific websites. **Be polite while mining data**.  
 
 #### With Docker
 The most common way to run this URL Builder script is to run it on a Docker container, as the dependencies will be updated to the latest working Python packages. To download the repository and build the Docker image, you can run the following command:
@@ -14,3 +14,22 @@ The most common way to run this URL Builder script is to run it on a Docker cont
     docker build -t IMAGE_NAME urlbuilder
 
 ### Getting Started
+At the moment of running the container, it's required to set up some environment variables at the runtime, related to the BigQuery authentication and authorization workflow. The followinf variables must be set:
+- `PROJECT_ID`: Name of the Google Cloud project;
+- `TABLE_ID`: In the format `dataset_id`.`table_id`. Required to declare the dataset to insert the information extracted from the search pages. Example: *urls.articles*;
+- `GOOGLE_APPLICATION_CREDENTIALS`: Credentials file associated with the account with BigQuery permissions. On instructions with how to set up your credentials, follow [Service accounts](https://cloud.google.com/iam/docs/service-accounts). The following roles must be defined to the correct runtime of the URL Builder:
+
+
+    - `bigquery.jobs.create`
+    - `bigquery.tables.create`
+    - `bigquery.tables.get`
+    - `bigquery.tables.updateData`
+
+``
+    docker run --rm -d
+    --env PROJECT_ID="my-project"
+    --env TABLE_ID="my-dataset.my-credentials"
+    --env GOOGLE_APPLICATION_CREDENTIALS=/credentials.json
+    --mount type=bind,source="$(pwd)"/credentials.json,target=/credentials.json,readonly
+    builder medicine virus 100
+``
