@@ -14,8 +14,5 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY urlbuilder.py ./
-ENV PROJECT_ID	for-adrian
-ENV TABLE_ID	urls.articles
 
 ENTRYPOINT ["python", "./urlbuilder.py"]
-CMD ["protein", "medicine", "virus", "20"]
