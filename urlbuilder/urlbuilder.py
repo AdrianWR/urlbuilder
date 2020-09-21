@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from google.oauth2.service_account import Credentials
 from urllib import parse
 import centaurminer as mining
 import pandas as pd
@@ -11,7 +10,6 @@ import time
 import json
 import sys
 import os
-
 
 
 """# URL Builder
@@ -71,7 +69,7 @@ class URLBuilder():
         # and max number of pages
         self.miner.wd.get(self.search_url(domain, keywords))
         URLS_PER_PAGE = 15
-        total_hits = int(self.miner.get(miner.site.total_hits).replace(' ', ''))
+        total_hits = int(self.miner.get(self.miner.site.total_hits).replace(' ', ''))
         n_pages = math.ceil(total_hits / URLS_PER_PAGE)
 
         # If there's no limit, fetch all article urls and data
@@ -82,12 +80,12 @@ class URLBuilder():
             self.miner.wd.get(source_page)
             
             # No more URLs available
-            if miner.get(miner.site.finish):
+            if self.miner.get(self.miner.site.finish):
                 return
 
             # Get the links and send to dataframe
             # Additional parameters will be inserted into meta_info field
-            links = self.miner.get(miner.site.link_elem, several=True)
+            links = self.miner.get(self.miner.site.link_elem, several=True)
             df = self.create_url_dataframe(links, source_page, search_terms=keywords)
             
             # Gather no more than `limit` urls

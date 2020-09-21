@@ -1,8 +1,12 @@
 #!venv /usr/bin/python3
 
+from google.oauth2.service_account import Credentials
 from urlbuilder import ScieloSearchLocations
 from urlbuilder import URLBuilder
 import centaurminer as mining
+import pandas_gbq
+import sys
+import os
 
 # The order is important here.
 # Be careful before changing any value.
@@ -17,7 +21,10 @@ url_schema = [
     {'name': 'meta_info',   'type': 'STRING'                      }
 ]
 
-def authenticate():
+
+
+def main():
+
     # Google BigQuery Authentication. At first, we'll try to fetch
     # authentication data from a 'credentials.json' file at our 
     # working directory. If this file doesn't exist, we authenticate
@@ -34,8 +41,6 @@ def authenticate():
     project_id   = os.environ["PROJECT_ID"]
     url_table_id = os.environ["TABLE_ID"]
 
-
-def main():
     driver_path='/usr/lib/chromium-browser/chromedriver'
     miner = mining.MiningEngine(ScieloSearchLocations, driver_path=driver_path)
     URLBuilder.connect_to_gbq(credentials, project_id, url_table_id, url_schema)
