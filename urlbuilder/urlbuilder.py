@@ -8,8 +8,6 @@ import datetime
 import math
 import time
 import json
-import sys
-import os
 
 
 """# URL Builder
@@ -25,7 +23,6 @@ The URL Builder is a utility built around Centaur Miner scraping mechanism. It a
 
 This is expected as the `URLBuilder` will work associated with the `JobDispatcher`, a special algorithm to organize and distribute the mining task amongst a single or several workers.
 """
-
 
 class ScieloSearchLocations(mining.PageLocations):
     """HTML locations on the earch page to be gathered by centaurminer"""
@@ -67,7 +64,7 @@ class URLBuilder():
 
         # Gather search meta information: max number of results
         # and max number of pages
-        self.miner.wd.get(self.search_url(domain, keywords))
+        self.miner.wd.get(self._search_url(domain, keywords))
         URLS_PER_PAGE = 15
         total_hits = int(self.miner.get(self.miner.site.total_hits).replace(' ', ''))
         n_pages = math.ceil(total_hits / URLS_PER_PAGE)
@@ -76,7 +73,7 @@ class URLBuilder():
         if limit is None:
             limit = total_hits
         for i in range(n_pages):
-            source_page = self.search_url(domain, keywords, i + 1)
+            source_page = self._search_url(domain, keywords, i + 1)
             self.miner.wd.get(source_page)
             
             # No more URLs available
@@ -86,7 +83,7 @@ class URLBuilder():
             # Get the links and send to dataframe
             # Additional parameters will be inserted into meta_info field
             links = self.miner.get(self.miner.site.link_elem, several=True)
-            df = self.create_url_dataframe(links, source_page, search_terms=keywords)
+            df = self._create_url_dataframe(links, source_page, search_terms=keywords)
             
             # Gather no more than `limit` urls
             count += len(df)
@@ -122,7 +119,7 @@ class URLBuilder():
 
 
     @staticmethod
-    def create_url_dataframe(links, source_page, **kwargs):
+    def _create_url_dataframe(links, source_page, **kwargs):
       """Prepare and parse URL data before results yield
       Args:
           links (`list` of `str`): article URLs from search webpage.
@@ -151,7 +148,7 @@ class URLBuilder():
 
 
     @staticmethod
-    def search_url(domain, search_terms, page_index=1, urls_per_page=15):
+    def _search_url(domain, search_terms, page_index=1, urls_per_page=15):
         """Build page search URL from input search terms
         Args:
             domain(string): Web domain of the search webpage
@@ -179,6 +176,7 @@ class URLBuilder():
         new_url = parse.urlunparse(parsed_url._replace(query = parse.urlencode(new_query)))
         return f"{new_url}&q={parse.quote_plus(new_query['q'])}&lang={new_query['lang']}&page={page_index}"
 
+
     @classmethod
     def connect_to_gbq(cls, credentials, project_id, url_table_id, schema=None):
         """ Establish a connection with Google BigQuery
@@ -205,12 +203,3 @@ class URLBuilder():
         cls.table_id = url_table_id
         cls.schema = schema
         pass
-
-"""## Basic Gathering from `search.scielo.org`
-
-Send URLs to Google BigQuery based on the following information from the website:
-
-* `search_domain`: Not to be confused with the overall domain; they can be the same, it depends on the website.
-* `search_terms`: List of strings, with the terms required to gather articles from search mechanism.
-* `limit`: Maximum number of URLs to retrieve from the search process.
-"""
