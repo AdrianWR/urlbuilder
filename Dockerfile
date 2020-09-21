@@ -13,6 +13,6 @@ RUN curl -LO https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/c
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY urlbuilder.py ./
+COPY urlbuilder urlbuilder
 
-ENTRYPOINT ["python", "./urlbuilder.py"]
+ENTRYPOINT ["python", "./urlbuilder"]
