@@ -3,3 +3,4 @@
 .*.swo
 *.json
 run.sh
+__pycache__
