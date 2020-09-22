@@ -12,6 +12,7 @@ RUN curl -LO https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/c
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install pyarrow
 
 COPY urlbuilder urlbuilder
 

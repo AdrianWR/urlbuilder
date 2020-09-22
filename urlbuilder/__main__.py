@@ -1,10 +1,11 @@
 #!venv /usr/bin/python3
 
-from google.oauth2.service_account import Credentials
+from google.cloud import bigquery
+#from google.oauth2.service_account import Credentials
 from urlbuilder import ScieloSearchLocations
 from urlbuilder import URLBuilder
 import centaurminer as mining
-import pandas_gbq
+#import pandas_gbq
 import sys
 import os
 
@@ -21,6 +22,16 @@ url_schema = [
     {'name': 'meta_info',   'type': 'STRING'                      }
 ]
 
+job_config = bigquery.LoadJobConfig(schema=[
+    bigquery.SchemaField('article_url', 'STRING', mode='REQUIRED'),
+    bigquery.SchemaField('catalog_url', 'STRING', mode='REQUIRED'),
+    bigquery.SchemaField('is_pdf', 'INTEGER', mode='REQUIRED'),
+    bigquery.SchemaField('language', 'STRING'),
+    bigquery.SchemaField('status', 'STRING', mode='REQUIRED'),
+    bigquery.SchemaField('timestamp', 'TIMESTAMP', mode='REQUIRED'),
+    bigquery.SchemaField('worker_id', 'STRING'),
+    bigquery.SchemaField('meta_info', 'STRING'),
+])
 
 
 def main():
@@ -30,20 +41,19 @@ def main():
     # working directory. If this file doesn't exist, we authenticate
     # with web login.
     try:
-        cred_file = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
-        credentials = Credentials.from_service_account_file(cred_file)
+        client = bigquery.Client()
     except (KeyError, FileNotFoundError):
         print("Invalid credentials. Set GOOGLE_APPLICATION_CREDENTIALS to your credentials file.");
         exit(1);
 
     # Project, dataset and table configuration
-    pandas_gbq.context.credentials = credentials
+    #pandas_gbq.context.credentials = credentials
     project_id   = os.environ["PROJECT_ID"]
     url_table_id = os.environ["TABLE_ID"]
 
     driver_path='/usr/lib/chromium-browser/chromedriver'
     miner = mining.MiningEngine(ScieloSearchLocations, driver_path=driver_path)
-    URLBuilder.connect_to_gbq(credentials, project_id, url_table_id, url_schema)
+    URLBuilder.connect_to_gbq(client, project_id, url_table_id, job_config)
     scielo_builder = URLBuilder(miner)
 
     # Collect these number of URLs and store them in pd.DataFrame

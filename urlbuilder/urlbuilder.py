@@ -94,30 +94,6 @@ class URLBuilder():
                 return
 
 
-    def collect(self, base_url, keywords, limit=100, delay_time=1):
-        """Collect URLs until there's no more to send to GBQ.
-
-        Args:
-            base_url (string): Domain URL for search mechanism.
-            keywords (`list` of `int`): List of keywords to search for.
-            limit (int, optional): Max number of URLs to collect to GBQ.
-            delay_time (int, optional): Number of seconds of delay between
-                search page requests.
-        Returns:
-            Number of URLs collected and sent to GBQ.
-        """
-        total = 0
-        for new_urls in self.dataframe_generator(base_url, keywords, limit):
-            pandas_gbq.to_gbq(new_urls, self.table_id, self.project_id,
-                              if_exists='append', table_schema=self.schema)
-            time.sleep(delay_time)
-            n = len(new_urls)
-            if n:
-                print(f"Sending {n} URLs to {self.table_id} on Google Bigquery")
-                total += n
-        return total
-
-
     @staticmethod
     def _create_url_dataframe(links, source_page, **kwargs):
       """Prepare and parse URL data before results yield
@@ -141,10 +117,40 @@ class URLBuilder():
       df['is_pdf'] = df['article_url'].apply(is_pdf)
       df['language'] = df['article_url'].apply(lang)
       df['status'] = 'Not Mined'
-      df['timestamp'] = datetime.datetime.utcnow()
+      df['timestamp'] = pd.Timestamp(datetime.datetime.utcnow())
       df['worker_id'] = None
       df['meta_info'] = json.dumps(kwargs)
       return df
+
+
+    def collect(self, base_url, keywords, limit=100, delay_time=1):
+        """Collect URLs until there's no more to send to GBQ.
+
+        Args:
+            base_url (string): Domain URL for search mechanism.
+            keywords (`list` of `int`): List of keywords to search for.
+            limit (int, optional): Max number of URLs to collect to GBQ.
+            delay_time (int, optional): Number of seconds of delay between
+                search page requests.
+        Returns:
+            Number of URLs collected and sent to GBQ.
+        """
+        total = 0
+        for new_urls in self.dataframe_generator(base_url, keywords, limit):
+            job = self.credentials.load_table_from_dataframe(
+                new_urls, self.table_id, job_config=self.schema
+                )
+            
+            #pandas_gbq.to_gbq(new_urls, self.table_id, self.project_id,
+                           #   if_exists='append', table_schema=self.schema)
+            job.result()
+            time.sleep(delay_time)
+            n = len(new_urls)
+            if n:
+                print(f"Sending {n} URLs to {self.table_id} on Google Bigquery")
+                total += n
+        return total
+
 
 
     @staticmethod
