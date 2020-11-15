@@ -107,15 +107,15 @@ class URLBuilder():
             Number of URLs collected and sent to GBQ.
         """
         total = 0
-        urls_list = []
+        urls_dataframe = pd.DataFrame([])
         for new_urls in self.dataframe_generator(base_url, keywords, limit):
-            urls_list.append(new_urls)
+            urls_dataframe.append(new_urls)
             time.sleep(delay_time)
             n = len(new_urls)
             if n:
                 print(f"Including {n} URLs to memory storage")
                 total += n
-        pandas_gbq.to_gbq(urls_list, self.table_id, self.project_id,
+        pandas_gbq.to_gbq(urls_dataframe, self.table_id, self.project_id,
                               if_exists='append', table_schema=self.schema)
         print(f"Sending {total} URLs to {self.table_id} on Google Bigquery")
         return total
