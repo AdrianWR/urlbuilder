@@ -144,7 +144,7 @@ class URLBuilder():
       df['is_pdf'] = df['article_url'].apply(is_pdf)
       df['language'] = df['article_url'].apply(lang)
       df['status'] = 'Not Mined'
-      df['timestamp'] = datetime.datetime.utcnow()
+      df['timestamp'] = pd.Timestamp(datetime.datetime.utcnow())
       df['worker_id'] = None
       df['meta_info'] = json.dumps(kwargs)
       return df
